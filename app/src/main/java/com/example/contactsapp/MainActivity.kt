@@ -3,59 +3,70 @@ package com.example.contactsapp
 import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
-import android.view.Menu
-import android.view.MenuItem
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.contactsapp.databinding.ActivityMainBinding
+import com.example.contactsapp.databinding.AddItemBinding
 import com.example.contactsapp.databinding.ListItemBinding
 import com.example.contactsapp.model.Contact
-import com.example.contactsapp.view.ContactAdapter
+import com.example.contactsapp.ui.adapter.ContactAdapter
+import com.example.contactsapp.ui.viewmodel.ContactViewModel
+import com.example.contactsapp.ui.viewmodel.ContactViewModelFactory
 
 class MainActivity : AppCompatActivity() {
 
-    //private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
-    private lateinit var bindingItem: ListItemBinding
-    private lateinit var contactList: ArrayList<Contact>
-    private lateinit var contactAdapter: ContactAdapter
+    private lateinit var binding2: ListItemBinding
+    private lateinit var binding3: AddItemBinding
+    lateinit var viewModel: ContactViewModel
+    lateinit var contactAdapter: ContactAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         setSupportActionBar(binding.toolbar)
 
-        contactList = ArrayList()
-        contactAdapter = ContactAdapter(this, contactList)
-
+        contactAdapter = ContactAdapter(this)
         binding.recycler.layoutManager = LinearLayoutManager(this)
-        binding.recycler.adapter = contactAdapter
+        //binding.recycler.adapter = contactAdapter
 
-        binding.addFAB.setOnClickListener { addInfo() }
+        viewModel = ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(application))
+            .get(ContactViewModel::class.java)
+
+        viewModel.getContacts().observe(viewLifecycleOwner) {
+            contactAdapter.submitList(it)
+        }
+
+        binding.apply {
+            recycler.adapter = contactAdapter
+            binding.addFAB.setOnClickListener {
+                addInfo()
+            }
+        }
+        //binding.addFAB.setOnClickListener { addInfo() }
     }
 
     private fun addInfo() {
+        viewModel.getContact(id).observe(viewLifecycleOwner){
+            contact = it
+            bindContact(contact)
+        }
+
         val inflater = LayoutInflater.from(this)
         val v = inflater.inflate(R.layout.add_item, null)
-        val contactName = v.findViewById<EditText>(R.id.name)
-        val contactNumber = v.findViewById<EditText>(R.id.number)
+        val contactName = binding3.nameEdit
+        val contactNumber = binding3.numberEdit
         val addDialog = AlertDialog.Builder(this)
         addDialog.setView(v)
         addDialog.setPositiveButton("Ok") {
             dialog,_ ->
-            val name = contactName.text.toString()
-            val number = contactNumber.text.toString()
-            contactList.add(Contact(name, number))
-            contactAdapter.notifyDataSetChanged()
+            viewModel.addContact(contactName.text.toString(), contactNumber.text.toString())
             Toast.makeText(this, "Successfully Added Contact!", Toast.LENGTH_SHORT).show()
             dialog.dismiss()
         }
@@ -68,30 +79,35 @@ class MainActivity : AppCompatActivity() {
         addDialog.show()
     }
 
-    /**
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
+    private fun deleteContact(contact: Contact) {
+        viewModel.deleteContact(contact)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        return when (item.itemId) {
-            R.id.action_settings -> true
-            else -> super.onOptionsItemSelected(item)
+    private fun updateContact() {
+        if (isValidEntry()) {
+            viewModel.updateContact(
+                name = binding3.nameEdit.text.toString(),
+                number = binding3.numberEdit.text.toString()
+            )
         }
     }
 
-    */
+    private fun bindContact(contact: Contact) {
+        binding2.apply{
+            name.setText(contact.name, TextView.BufferType.SPANNABLE)
+            number.setText(contact.number, TextView.BufferType.SPANNABLE)
 
-    /**
-    override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
-        return navController.navigateUp(appBarConfiguration)
-                || super.onSupportNavigateUp()
+
+        }
+
     }
-    */
+
+    private fun isValidEntry() = viewModel.isValidEntry(
+        binding2.name.text.toString(),
+        binding2.number.text.toString()
+    )
+
+
+
+
 }
