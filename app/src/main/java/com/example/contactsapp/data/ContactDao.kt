@@ -10,8 +10,8 @@ interface ContactDao {
     @Query("Select * from contactsTable")
     fun getContacts(): Flow<List<Contact>>
 
-    @Query("Select * from contactsTable where id = :id")
-    fun getContact(id: Long): Flow<Contact>
+    @Query("Select * from contactsTable where number = :number")
+    fun getContact(number: String): Flow<Contact>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(contact :Contact)

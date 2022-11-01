@@ -12,7 +12,7 @@ class ContactViewModel(
 
     fun getContacts(): LiveData<List<Contact>> = contactDao.getContacts().asLiveData()
 
-    fun getContact(id: Long) : LiveData<Contact> = contactDao.getContact(id).asLiveData()
+    fun getContact(number: String) : LiveData<Contact> = contactDao.getContact(number).asLiveData()
 
     fun addContact(
         name: String,
