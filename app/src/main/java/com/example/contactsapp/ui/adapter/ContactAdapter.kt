@@ -1,38 +1,47 @@
 package com.example.contactsapp.ui.adapter
 
-import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.contactsapp.R
 import com.example.contactsapp.databinding.ListItemBinding
 import com.example.contactsapp.model.Contact
-import com.example.contactsapp.ui.viewmodel.ContactViewModel
 
+class ContactAdapter : RecyclerView.Adapter<ContactAdapter.contactViewHolder>() {
 
-class ContactAdapter(
-    var items: List<Contact>,
-    private val viewModel: ContactViewModel
-): RecyclerView.Adapter<ContactAdapter.contactViewHolder>() {
+    var allItems: List<Contact> = listOf()
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
+    var listener: ItemListener? = null
 
-    override fun getItemCount(): Int {
-        return items.size
-    }
+    override fun getItemCount() = allItems.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): contactViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.list_item, parent, false)
-        return contactViewHolder(view)
+        val binding = ListItemBinding.inflate(LayoutInflater.from(parent.context),parent,false)
+        return contactViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: contactViewHolder, position: Int) {
-        val contact = items[position]
-        holder.itemView.tvName.text = contact.name
-        holder.itemView.tvNumber.text = "${contact.number}"
+        holder.bind(allItems[position])
     }
 
-    inner class contactViewHolder(itemView: View): RecyclerView.ViewHolder(itemView)
+    inner class contactViewHolder(private val binding: ListItemBinding): RecyclerView.ViewHolder(binding.root) {
+        fun bind(contact: Contact){
+            binding.apply {
+                tvName.text = contact.name
+                tvNumber.text = contact.number
 
+                deleteBtn.setOnClickListener {
+                    listener?.onDeleteClicked(contact)
+                }
+            }
+        }
+    }
+
+}
+interface ItemListener {
+    fun onAddClicked(contact: Contact)
+    fun onSubtractClicked(contact: Contact)
+    fun onDeleteClicked(contact: Contact)
 }

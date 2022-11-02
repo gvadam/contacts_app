@@ -1,67 +1,70 @@
 package com.example.contactsapp
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import androidx.appcompat.app.AppCompatActivity
-import android.widget.EditText
-import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.viewModels
-import androidx.appcompat.app.AlertDialog
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.NavArgs
-import com.example.contactsapp.BaseApplication
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.contactsapp.databinding.ActivityMainBinding
-import com.example.contactsapp.databinding.AddItemBinding
-import com.example.contactsapp.databinding.ListItemBinding
 import com.example.contactsapp.model.Contact
 import com.example.contactsapp.ui.adapter.ContactAdapter
-import com.example.contactsapp.ui.contactlist.AddContactItemDialog
-import com.example.contactsapp.ui.contactlist.AddDialogListener
+import com.example.contactsapp.ui.adapter.ItemListener
+import com.example.contactsapp.ui.contactlist.AddContactItem
 import com.example.contactsapp.ui.viewmodel.ContactViewModel
-import com.example.contactsapp.ui.viewmodel.ContactViewModelFactory
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import org.kodein.di.KodeinAware
-import org.kodein.di.android.kodein
-import org.kodein.di.generic.instance
+import dagger.hilt.android.AndroidEntryPoint
 
-class MainActivity : AppCompatActivity(), KodeinAware {
+@AndroidEntryPoint
+class MainActivity : AppCompatActivity(), ItemListener {
 
-    override val kodein by kodein()
     private lateinit var binding: ActivityMainBinding
-    private val factory: ContactViewModelFactory by instance()
-    lateinit var viewModel: ContactViewModel
+    private val viewModel: ContactViewModel by viewModels()
+    private val adapter = ContactAdapter()
+
+    private val addBottomSheet = AddContactItem.INSTANCE
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
+        initViews()
+        initDatabase()
+    }
 
-        viewModel = ViewModelProvider(this, factory).get(ContactViewModel::class.java)
-
-        val adapter = ContactAdapter(listOf(), viewModel)
-        binding.recycler.layoutManager = LinearLayoutManager(this)
-        binding.recycler.adapter = adapter
-
-        viewModel.getContacts().observe(this, Observer {
-            adapter.items = it
-            adapter.notifyDataSetChanged()
-        })
-
-        binding.addFAB.setOnClickListener {
-            AddContactItemDialog(
-                this,
-                object : AddDialogListener {
-                    override fun onAddButtonClicked(item: Contact) {
-                        viewModel.insert(item)
-                    }
-                }).show()
+    private fun initDatabase() {
+        viewModel.getAllItems().observe(this) {
+            adapter.allItems = it
         }
+    }
+
+    private fun initViews() {
+        binding.apply {
+            recycler.adapter = this@MainActivity.adapter
+            recycler.layoutManager = LinearLayoutManager(this@MainActivity)
+            addFAB.setOnClickListener {
+                fabClicked()
+            }
+
+        }
+        adapter.listener = this
+    }
+
+    private fun fabClicked() {
+        addBottomSheet.show(supportFragmentManager) {
+            viewModel.addItem(it)
+        }
+    }
+
+    override fun onAddClicked(contact: Contact) {
+         Toast.makeText(this, "hi", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onSubtractClicked(contact: Contact) {
+         Toast.makeText(this, "hey", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onDeleteClicked(contact: Contact) {
+         viewModel.deleteItem(contact)
     }
 
 

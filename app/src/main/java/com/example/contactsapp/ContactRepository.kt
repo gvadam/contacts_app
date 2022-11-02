@@ -1,18 +1,16 @@
 package com.example.contactsapp
 
-import androidx.annotation.WorkerThread
-import androidx.lifecycle.LiveData
+
 import com.example.contactsapp.data.ContactDao
 import com.example.contactsapp.model.Contact
-import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class ContactRepository(private val contactDao: ContactDao) {
+class ContactRepository @Inject constructor(private val contactDao: ContactDao) {
 
-    fun getContacts(): LiveData<List<Contact>> = contactDao.getContacts()
+    fun getAllItem() = contactDao.getAllItems()
 
-    @Suppress("RedundantSuspendModifier")
-    @WorkerThread
-    suspend fun insert(contact: Contact) {
-        contactDao.insert(contact)
-    }
+    //suspend fun updateItem(contact: Contact) = contactDao.upsert(contact)
+     fun insert(contact: Contact) = contactDao.upsert(contact)
+     fun delete(contact: Contact) = contactDao.delete(contact)
+    //suspend fun insertItems(contact: List<Contact>) = contactDao.insertItems(contact)
 }

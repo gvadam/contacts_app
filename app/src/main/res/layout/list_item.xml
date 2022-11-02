@@ -43,12 +43,13 @@
 
         </LinearLayout>
 
-        <ImageView
-            android:src="@drawable/ic_more"
+        <ImageButton
+            android:id="@+id/deleteBtn"
+            android:src="@drawable/ic_delete"
             android:layout_gravity="center"
             android:layout_margin="10dp"
-            android:layout_width="40dp"
-            android:layout_height="40dp"/>
+            android:layout_width="50dp"
+            android:layout_height="50dp"/>
 
     </LinearLayout>
 
