@@ -1,5 +1,6 @@
 package com.example.contactsapp.data
 
+import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.example.contactsapp.model.Contact
 import kotlinx.coroutines.flow.Flow
@@ -8,10 +9,10 @@ import kotlinx.coroutines.flow.Flow
 interface ContactDao {
 
     @Query("Select * from contactsTable")
-    fun getContacts(): Flow<List<Contact>>
+    fun getContacts(): LiveData<List<Contact>>
 
     @Query("Select * from contactsTable where number = :number")
-    fun getContact(number: String): Flow<Contact>
+    fun getContact(number: String): LiveData<Contact>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(contact :Contact)
