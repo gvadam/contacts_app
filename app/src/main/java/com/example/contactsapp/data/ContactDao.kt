@@ -10,9 +10,6 @@ interface ContactDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(contact: Contact)
 
-    @Update
-    fun update(contact: Contact)
-
     @Delete
     fun delete(contact: Contact)
 
@@ -22,6 +19,4 @@ interface ContactDao {
     @Insert
     fun insertItems(contacts: List<Contact>)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun upsert(contact: Contact)
 }

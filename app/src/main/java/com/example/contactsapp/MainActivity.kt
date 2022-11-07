@@ -55,14 +55,6 @@ class MainActivity : AppCompatActivity(), ItemListener {
         }
     }
 
-    override fun onAddClicked(contact: Contact) {
-         Toast.makeText(this, "hi", Toast.LENGTH_SHORT).show()
-    }
-
-    override fun onSubtractClicked(contact: Contact) {
-         Toast.makeText(this, "hey", Toast.LENGTH_SHORT).show()
-    }
-
     override fun onDeleteClicked(contact: Contact) {
          viewModel.deleteItem(contact)
     }

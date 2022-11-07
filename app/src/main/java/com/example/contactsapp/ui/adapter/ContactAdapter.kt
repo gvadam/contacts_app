@@ -41,7 +41,5 @@ class ContactAdapter : RecyclerView.Adapter<ContactAdapter.contactViewHolder>() 
 
 }
 interface ItemListener {
-    fun onAddClicked(contact: Contact)
-    fun onSubtractClicked(contact: Contact)
     fun onDeleteClicked(contact: Contact)
 }
